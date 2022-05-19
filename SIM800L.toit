@@ -24,12 +24,26 @@ class SIM800L extends SimcomCellular:
       --preferred_baud_rate=115200
       --use_psm=not is_always_online
 
+  response_wait -> bool --session --atCommand --args --tries=null:
+    if (tries != null) and (tries > 15): return false
+
+    if (session.set atCommand args == 1):
+      return true
+
+    else:
+      tries += 1
+      sleep --ms=1000
+      response_wait --session=session --atCommand=atCommand --args=args --tries=tries
+      return false
+
+
   on_connected_ session/at.Session:
     // Attach to network.
     // session.set "+QICSGP" [cid_]
-    session.set "+CGATT" [1]
+    response_wait --session=session --atCommand="+CGATT" --args=[1]
+    // session.set "+CGATT" [1]
     // session.set "+QIACT" [cid_]
-
+    
     // Set to multi IP
     session.set "+CIPMUX" [1]
 
