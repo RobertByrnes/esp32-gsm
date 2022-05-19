@@ -19,9 +19,8 @@ import uart
 import simcom_cellular.SIM800L show SIM800L
 
 
-APN ::= "giffgaff.com"
-BANDS ::= [ 20, 8 ]
-RATS ::= null
+APN ::= ["giffgaff.com","gg","p"]
+
 // SIM800 pins
 // define MODEM_RST            5                      // Reset pin
 // define MODEM_PWKEY          4                      // Enable pin
@@ -30,6 +29,7 @@ RATS ::= null
 // define MODEM_RX             26                     // Receive pin
 // define I2C_SDA              21                     // Serial data
 // define I2C_SCL              22                     // Serial clock
+
 TX_PIN_NUM ::= 27
 RX_PIN_NUM ::= 26
 PWR_ON_NUM ::= 4
