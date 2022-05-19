@@ -11,6 +11,7 @@ The example resets the modem before connecting to remove any unexpected state
 */
 import cellular
 import gpio
+import http
 import http.client show Client
 import log
 import net
