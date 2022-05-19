@@ -3,7 +3,7 @@
 // be found in the EXAMPLES_LICENSE file.
 
 /**
-This example demonstrates how to create a Sara R4 driver and connect it to a
+This example demonstrates how to create a simCOM SIM800L driver and connect it to a
   cellular network.
 
 The example resets the modem before connecting to remove any unexpected state
@@ -68,9 +68,7 @@ connect driver/cellular.Cellular -> bool:
   logger.info "version $driver.version"
   logger.info "iccid: $driver.iccid"
   logger.info "CONFIGURING..."
-  driver.configure APN --bands=BANDS --rats=RATS
-  logger.info "ENABLING RADIO..."
-  driver.enable_radio
+  driver.configure APN
   logger.info "CONNECTING..."
   try:
     dur := Duration.of:
