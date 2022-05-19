@@ -1,0 +1,22 @@
+dependencies:
+  cellular:
+    url: github.com/toitware/cellular
+    version: ^1.0.11
+  cellular_connector:
+    url: github.com/toitware/cellular-connector
+    version: ^0.1.0
+  http:
+    url: github.com/toitlang/pkg-http
+    version: ^1.8.0
+  quectel_cellular:
+    url: github.com/toitware/quectel-cellular
+    version: ^0.1.9
+  sequans_cellular:
+    url: github.com/toitware/sequans-cellular
+    version: ^0.1.2
+  u_blox_cellular:
+    url: github.com/toitware/ublox-cellular
+    version: ^0.3.9
+  simcom_cellular:
+    url: github.com/toitware/simcom-cellular
+    version: ^0.1.9

@@ -1,0 +1,63 @@
+prefixes:
+  cellular: cellular
+  cellular_connector: cellular-connector
+  http: pkg-http
+  quectel_cellular: quectel-cellular
+  sequans_cellular: sequans-cellular
+  u_blox_cellular: ublox-cellular
+  simcom_cellular: simcom-cellular
+packages:
+  cellular:
+    url: github.com/toitware/cellular
+    version: 1.0.11
+    hash: 507b47d1dc23db1eda6480764daae0872a8ce75c
+    prefixes:
+      gnss_location: toit-gnss-location
+  cellular-connector:
+    url: github.com/toitware/cellular-connector
+    version: 0.1.0
+    hash: 2262d6dc3a15849459ebec35a726758f45dbbc2a
+    prefixes:
+      cellular: cellular
+  pkg-http:
+    url: github.com/toitlang/pkg-http
+    version: 1.8.0
+    hash: 91b51dd6bbb9ce04df3c9c9fabaded9de90fb0c9
+  quectel-cellular:
+    url: github.com/toitware/quectel-cellular
+    version: 0.1.9
+    hash: 6179c73c3962c00bd5f2e56bef3664dbe82a97c1
+    prefixes:
+      cellular: cellular
+      gnss_location: toit-gnss-location
+      location: toit-location
+  sequans-cellular:
+    url: github.com/toitware/sequans-cellular
+    version: 0.1.2
+    hash: e381a4a61a543bb491e86321759b58f085fe29ec
+    prefixes:
+      cellular: cellular
+  toit-gnss-location:
+    url: github.com/toitware/toit-gnss-location
+    version: 1.0.2
+    hash: e9457f50c5260f9451e823a39d435e3655125bb0
+    prefixes:
+      location: toit-location
+  toit-location:
+    url: github.com/toitware/toit-location
+    version: 1.0.0
+    hash: 080665c10587c1ef82e26b993dda7fa560cf2075
+  ublox-cellular:
+    url: github.com/toitware/ublox-cellular
+    version: 0.3.9
+    hash: 6ddd72659d51ad656adf744487be4d1eace79e1a
+    prefixes:
+      cellular: cellular
+  simcom-cellular:
+    url: github.com/toitware/simcom-cellular
+    version: 0.1.9
+    hash: 6179c73c3962c00bd5f2e56bef3664dbe82a97c1
+    prefixes:
+      cellular: cellular
+      gnss_location: toit-gnss-location
+      location: toit-location
