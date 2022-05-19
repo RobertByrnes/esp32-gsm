@@ -24,7 +24,7 @@ class SIM800L extends SimcomCellular:
       --preferred_baud_rate=115200
       --use_psm=not is_always_online
 
-  response_wait -> bool --session --atCommand --args --tries=null:
+  response_wait -> bool --session --atCommand --args=null --tries=null:
     if (tries != null) and (tries > 15): return false
 
     if (session.set atCommand args == 1):
