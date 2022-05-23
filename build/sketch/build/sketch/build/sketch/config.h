@@ -49,4 +49,4 @@ const char* password = "kF4QMhzc3xcS";
 // Global variables
 int totalLength;       //total size of firmware
 int currentLength = 0; //current size of written firmware
-unsigned long PREVIOUS_MILLIS = 0;
+unsigned long commsPreviousMillis = 0;

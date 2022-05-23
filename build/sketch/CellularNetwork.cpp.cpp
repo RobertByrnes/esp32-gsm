@@ -1,7 +1,8 @@
-# 1 "c:\\code\\toit-sim800l-1\\CellularNetwork.cpp"
-# 1 "c:\\code\\toit-sim800l-1\\CellularNetwork.cpp"
-# 2 "c:\\code\\toit-sim800l-1\\CellularNetwork.cpp" 2
-# 3 "c:\\code\\toit-sim800l-1\\CellularNetwork.cpp" 2
+#include <Arduino.h>
+#line 1 "c:\\code\\toit-sim800l-1\\CellularNetwork.cpp"
+#line 1 "c:\\code\\toit-sim800l-1\\CellularNetwork.cpp"
+#include "CellularNetwork.h"
+#include <TinyGsmClient.h>
 
 // Constructor
 CellularNetwork::CellularNetwork(const char *apn, const char *gprs_user, const char *gprs_password, TinyGsm modem):
@@ -12,7 +13,7 @@ CellularNetwork::~CellularNetwork() {}
 
 bool CellularNetwork::initSim(const char simPin) {
    // Set GSM module baud rate and UART pins
-  Serial1.begin(115200, 0x800001c, 26 /* Receive pin*/, 27 /* Transmit pin*/);
+  SerialAT.begin(BAUD_RATE, SERIAL_8N1, MODEM_RX, MODEM_TX);
   delay(3000);
 
   this->connection.restart();
@@ -20,21 +21,25 @@ bool CellularNetwork::initSim(const char simPin) {
   // Unlock SIM card with a PIN if needed
   if (strlen(simPin) && this->connection.getSimStatus() != 3) {
     this->connection.simUnlock(simPin);
+#line 21 "c:\\code\\toit-sim800l-1\\main.ino"
+void setup();
+#line 77 "c:\\code\\toit-sim800l-1\\main.ino"
+void connectServer();
+#line 137 "c:\\code\\toit-sim800l-1\\main.ino"
+void beginFirwareUpdate();
+#line 186 "c:\\code\\toit-sim800l-1\\main.ino"
+void loop();
+#line 21 "c:\\code\\toit-sim800l-1\\main.ino"
   }
 
   return true;
 }
 
 /**
-
  * @brief Make up to 5 attempts to connect to the mobile network.
-
  * 
-
  * @return bool
-
  */
-# 31 "c:\\code\\toit-sim800l-1\\CellularNetwork.cpp"
 bool CellularNetwork::connectNetwork()
 {
   int i = 0;
@@ -48,19 +53,19 @@ bool CellularNetwork::connectNetwork()
   }
   return false;
 }
-# 1 "c:\\code\\toit-sim800l-1\\main.ino"
-# 2 "c:\\code\\toit-sim800l-1\\main.ino" 2
-# 3 "c:\\code\\toit-sim800l-1\\main.ino" 2
-
-# 5 "c:\\code\\toit-sim800l-1\\main.ino" 2
-# 6 "c:\\code\\toit-sim800l-1\\main.ino" 2
-# 7 "c:\\code\\toit-sim800l-1\\main.ino" 2
-# 8 "c:\\code\\toit-sim800l-1\\main.ino" 2
-# 9 "c:\\code\\toit-sim800l-1\\main.ino" 2
+#line 1 "c:\\code\\toit-sim800l-1\\main.ino"
+#include <Arduino.h>
+#include "config.h"
+#include "CellularNetwork.h"
+#include "OAuth2.h"
+#include <WiFi.h>
+#include <HTTPClient.h>
+#include <Update.h>
+#include <StreamDebugger.h>
 
 
 // INSTANTIATIONS
-TinyGsm modem(Serial1);
+TinyGsm modem(SerialAT);
 
 CellularNetwork network(APN, GPRS_USER, GPRS_PASSWORD, SIM_PIN, modem); // explore passing modem by reference
 
@@ -71,18 +76,18 @@ OAuth2 authHandler(OAUTH_HOST, OAUTH_TOKEN_PATH);
 
 void setup()
 {
-  if (true) Serial.begin(115200);
+  if (DEV) Serial.begin(BAUD_RATE);
 
   // Set modem enable, reset and power pins
-  pinMode(4 /* Enable pin*/, 0x02);
-  pinMode(5 /* Reset pin*/, 0x02);
-  pinMode(23 /* Power pin*/, 0x02);
-  digitalWrite(4 /* Enable pin*/, 0x0);
-  digitalWrite(5 /* Reset pin*/, 0x1);
-  digitalWrite(23 /* Power pin*/, 0x1);
+  pinMode(MODEM_PWKEY, OUTPUT);
+  pinMode(MODEM_RST, OUTPUT);
+  pinMode(MODEM_POWER_ON, OUTPUT);
+  digitalWrite(MODEM_PWKEY, LOW);
+  digitalWrite(MODEM_RST, HIGH);
+  digitalWrite(MODEM_POWER_ON, HIGH);
 
-  if (true) Serial.println("[+] Initializing modem...");
-
+  if (DEV) Serial.println("[+] Initializing modem...");
+  
   network.initSim(SIM_PIN);
 
 
@@ -121,15 +126,10 @@ void setup()
 // }
 
 /**
-
  * @brief Connects via mobile network to Draper Biovillam API to collect auth token before
-
  * reading DHT sensor and sending all latest readings.  Resets counters.
-
  *
-
  */
-# 77 "c:\\code\\toit-sim800l-1\\main.ino"
 void connectServer()
 {
   String completeResponse = "";
@@ -143,16 +143,16 @@ void connectServer()
       Serial.println("[-] failed to connect to mobile network");
   }
 
-  if (true) Serial.printf("[+] Connecting to ", SERVER);
+  if (DEV) Serial.printf("[+] Connecting to ", SERVER);
 
   if (!client.connect(SERVER, PORT)) {
-    if (true) Serial.println("[-] Connecting to server failed");
+    if (DEV) Serial.println("[-] Connecting to server failed");
   } else {
-    if (true) Serial.println("[+] Performing HTTP POST request to OAuth Server");
+    if (DEV) Serial.println("[+] Performing HTTP POST request to OAuth Server");
 
     client.print(authHandler.personalAccessClientTokenRequestString().c_str());
 
-    if (true) Serial.printf("[D] Request string to get token: ", authHandler.personalAccessClientTokenRequestString(), "\n");
+    if (DEV) Serial.printf("[D] Request string to get token: ", authHandler.personalAccessClientTokenRequestString(), "\n");
 
     unsigned long timeout = millis();
 
@@ -162,7 +162,7 @@ void connectServer()
 
         char response = client.read();
 
-        if (true) {
+        if (DEV) {
           Serial.print(response);
         } else {
           Serial.println("[-] Error in response");
@@ -174,16 +174,16 @@ void connectServer()
     client.stop();
     modem.gprsDisconnect();
 
-    if (true) {
-      Serial.println(((reinterpret_cast<const __FlashStringHelper *>(("[+] Server disconnected")))));
-      Serial.println(((reinterpret_cast<const __FlashStringHelper *>(("[+] GPRS disconnected")))));
+    if (DEV) {
+      Serial.println(F("[+] Server disconnected"));
+      Serial.println(F("[+] GPRS disconnected"));
     }
 
     String parsedResponse = authHandler.findJson(completeResponse);
 
     if (parsedResponse != "") {
       accessToken = authHandler.extractToken(parsedResponse);
-      if (true) Serial.println("[+] Access token: " + accessToken);
+      if (DEV) Serial.println("[+] Access token: " + accessToken);
     }
 
     timeout = millis();
@@ -241,7 +241,7 @@ void beginFirwareUpdate() {
 
 void loop()
 {
-  if (millis() - PREVIOUS_MILLIS >= 60000 /* every 1min*/) {
+  if (millis() - PREVIOUS_MILLIS >= CONNECTION_INTERVAL) {
     PREVIOUS_MILLIS = millis();
     RESTART_COUNTER++;
     connectServer();

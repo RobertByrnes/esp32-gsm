@@ -36,7 +36,7 @@ const char *GPRS_PASSWORD = "p"; // GPRS Password
 #define CONNECTION_INTERVAL 60000 // every 1min
 
 // ESP restart counter
-unsigned int RESTART_COUNTER = 0;
+unsigned int RESTART = 0;
 
 // location of firmware file on external web server
 // change to your actual .bin location
@@ -49,4 +49,3 @@ const char* password = "kF4QMhzc3xcS";
 // Global variables
 int totalLength;       //total size of firmware
 int currentLength = 0; //current size of written firmware
-unsigned long PREVIOUS_MILLIS = 0;

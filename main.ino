@@ -1,32 +1,25 @@
 #include <Arduino.h>
+#include "config.h"
+#include "CellularNetwork.h"
+#include "OAuth2.h"
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <Update.h>
 #include <StreamDebugger.h>
-#include <TinyGsmClient.h>
-#include "config.h"
-#include "functions.cpp"
 
-// INSTANTIATIONS
-// #define DUMP_AT_COMMANDS
-// Define the serial console for debug prints
-#ifdef DUMP_AT_COMMANDS
-StreamDebugger debugger(SerialAT, Debugger);
-TinyGsm modem(debugger);
-#else
+
 TinyGsm modem(SerialAT);
-#endif
 
-// Modem
+CellularNetwork network(APN, GPRS_USER, GPRS_PASSWORD, SIM_PIN, modem); // explore passing modem by reference
+
 TinyGsmClientSecure client(modem);
 
-// WiFi
-// HTTPClient client;
+OAuth2 authHandler(OAUTH_HOST, OAUTH_TOKEN_PATH);
+
 
 void setup()
 {
-  if (DEV)
-    Debugger.begin(115200);
+  if (DEV) Serial.begin(BAUD_RATE);
 
   // Set modem enable, reset and power pins
   pinMode(MODEM_PWKEY, OUTPUT);
@@ -36,18 +29,10 @@ void setup()
   digitalWrite(MODEM_RST, HIGH);
   digitalWrite(MODEM_POWER_ON, HIGH);
 
-  // Set GSM module baud rate and UART pins
-  SerialAT.begin(115200, SERIAL_8N1, MODEM_RX, MODEM_TX);
-  delay(3000);
+  if (DEV) Serial.println("[+] Initializing modem...");
 
-  if (DEV)
-    Debugger.println("[+] Initializing modem...");
+  network.initSim(SIM_PIN);
 
-  modem.restart();
-
-  // Unlock SIM card with a PIN if needed
-  if (strlen(simPIN) && modem.getSimStatus() != 3)
-    modem.simUnlock(simPIN);
 
 
   // Serial.begin(115200);
@@ -65,45 +50,23 @@ void setup()
 
 }
 
-void loop()
-{
-  if (millis() - commsPreviousMillis >= CONNECTION_INTERVAL) {
-    commsPreviousMillis = millis();
-    restart++;
-    connectServer();
-    if (restart >= 5) {
-      ESP.restart();
-    }
-  }
-}
-
-// Function to update firmware incrementally
-// Buffer is declared to be 128 so chunks of 128 bytes
-// from firmware is written to device until server closes
-void updateFirmware(uint8_t *data, size_t len)
-{
-  Update.write(data, len);
-  currentLength += len;
-  // Print dots while waiting for update to finish
-  Serial.print('.');
-  // if current length of written firmware is not equal to total firmware size, repeat
-  if (currentLength != totalLength)
-    return;
-  Update.end(true);
-  Serial.printf("\nUpdate Success, Total Size: %u\nRebooting...\n", currentLength);
-  // Restart ESP32 to see changes
-  ESP.restart();
-}
-
-/**
- * @brief returns to correct string for requesting an auth token from the server
- *
- * @return String
- */
-String httpRequestAuthString()
-{
-  return "grant_type=" + grantType + "&client_id=" + clientID + "&client_secret=" + clientSecret + "";
-}
+// // Function to update firmware incrementally
+// // Buffer is declared to be 128 so chunks of 128 bytes
+// // from firmware is written to device until server closes
+// void updateFirmware(uint8_t *data, size_t len)
+// {
+//   Update.write(data, len);
+//   currentLength += len;
+//   // Print dots while waiting for update to finish
+//   Serial.print('.');
+//   // if current length of written firmware is not equal to total firmware size, repeat
+//   if (currentLength != totalLength)
+//     return;
+//   Update.end(true);
+//   Serial.printf("\nUpdate Success, Total Size: %u\nRebooting...\n", currentLength);
+//   // Restart ESP32 to see changes
+//   ESP.restart();
+// }
 
 /**
  * @brief Connects via mobile network to Draper Biovillam API to collect auth token before
@@ -115,43 +78,24 @@ void connectServer()
   String completeResponse = "";
   String accessToken = "";
 
-  if (DEV) {
-    Debugger.print("[+] Connecting to APN: ");
-    Debugger.println(apn);
-  }
+  Serial.printf("[+] Connecting to APN: ", APN);
 
-  connectApn();
-
-  if (DEV) {
-    Debugger.print("[+] Connecting to ");
-    Debugger.println(server);
-  }
-
-  if (!client.connect(server, port)) {
-    if (DEV) {
-      Debugger.println("[-] Connecting to server failed");
-    }
+  if (network.connectNetwork()) {
+      Serial.println("[+] Connection to mobile network OK");
   } else {
-    if (DEV) {
-      Debugger.println(" OK");
-      Debugger.println("[+] Performing HTTP POST request to API to request an Access Token with:\n");
-    }
+      Serial.println("[-] failed to connect to mobile network");
+  }
 
-    client.print(String("POST ") + authPath + " HTTP/1.1\r\n");
-    client.print(String("Host: ") + server + "\r\n");
-    client.print(String("Accept: application/json\r\n"));
-    client.print("Content-Type: application/x-www-form-urlencoded\r\n");
-    client.print(String("Content-Length: ") + httpRequestAuthString().length() + "\r\n\r\n");
-    client.println(httpRequestAuthString());
+  Serial.printf("[+] Connecting to ", SERVER);
 
-    if (DEV) {
-      Debugger.println(httpRequestAuthString());
-      Debugger.print(String("POST ") + authPath + " HTTP/1.1\r\n");
-      Debugger.print(String("Host: ") + server + "\r\n");
-      Debugger.print(String("Accept: application/json\r\n"));
-      Debugger.print("Content-Type: application/x-www-form-urlencoded\r\n");
-      Debugger.print(String("Content-Length: ") + httpRequestAuthString().length() + "\r\n\r\n");
-    }
+  if (!client.connect(SERVER, PORT)) {
+    Serial.println("[-] Connecting to server failed");
+  } else {
+    Serial.println("[+] Performing HTTP POST request to OAuth Server");
+
+    client.print(authHandler.personalAccessClientTokenRequestString().c_str());
+
+    if (DEV) Serial.printf("[D] Request string to get token: ", authHandler.personalAccessClientTokenRequestString(), "\n");
 
     unsigned long timeout = millis();
 
@@ -162,7 +106,7 @@ void connectServer()
         char response = client.read();
 
         if (DEV) {
-          Debugger.print(response);
+          Serial.print(response);
         } else {
           Serial.println("[-] Error in response");
         }
@@ -174,15 +118,15 @@ void connectServer()
     modem.gprsDisconnect();
 
     if (DEV) {
-      Debugger.println(F("[+] Server disconnected"));
-      Debugger.println(F("[+] GPRS disconnected"));
+      Serial.println(F("[+] Server disconnected"));
+      Serial.println(F("[+] GPRS disconnected"));
     }
 
-    String parsedResponse = findJson(completeResponse);
+    String parsedResponse = authHandler.findJson(completeResponse);
 
     if (parsedResponse != "") {
-      accessToken = extractToken(parsedResponse);
-      if (DEV) Debugger.println("[+] Access token: " + accessToken);
+      accessToken = authHandler.extractToken(parsedResponse);
+      if (DEV) Serial.println("[+] Access token: " + accessToken);
     }
 
     timeout = millis();
@@ -238,58 +182,14 @@ void beginFirwareUpdate() {
   // }
 }
 
-void connectApn()
+void loop()
 {
-    // Make up to 5 attempts to connect to the mobile network
-  int i = 0;
-  while (i <= 5) {
-    ++i;
-    if (!modem.gprsConnect(apn, gprsUser, gprsPass)) {
-      if (DEV) Debugger.println("[-] failed to connect to mobile network");
-      delay(3000);
-      if (i == 5) continue;
-    } else {
-      Debugger.println("[+] Connection to mobile network OK");
-      break;
+  if (millis() - PREVIOUS_MILLIS >= CONNECTION_INTERVAL) {
+    PREVIOUS_MILLIS = millis();
+    RESTART_COUNTER++;
+    connectServer();
+    if (RESTART_COUNTER >= 5) {
+      ESP.restart();
     }
   }
-}
-/**
- * @brief Extract JSON from server response
- * 
- * @param response 
- * @return String 
- */
-String findJson(String response)
-{
-  Serial.println(response);
-  int firstCurly = response.indexOf("{") + 1;
-  int secondCurly = response.indexOf("}");
-  // String JSON = "";
-  String JSON = response.substring(firstCurly, secondCurly);
-  
-  // Serial.println(JSON);
-  if (JSON.length() > 1)
-    return JSON;
-  else
-    return String("");
-}
-
-/**
- * @brief Extract auth token from JSON string
- * 
- * @param JSON 
- * @return String 
- */
-String extractToken(String JSON)
-{
-  int beginningOfToken = JSON.lastIndexOf(":") + 2;
-  int endOfToken = JSON.lastIndexOf("\"");
-  String accesToken = JSON.substring(beginningOfToken, endOfToken);
-  Serial.println("[+] Acces Token: " + accesToken);
-
-  if (accesToken.length() > 1)
-    return accesToken;
-  else
-    return String("");
 }
