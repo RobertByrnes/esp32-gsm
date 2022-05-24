@@ -17,16 +17,18 @@ public:
     ~OAuth2();
 
     bool setGrantType(const string grantType, uint clientID, const string clientSecret);
-    string findJson(string response);
-    string extractToken(string JSON);
+    string getToken(string httpResponse);
     string personalAccessClientTokenRequestString();
-    string tokenRequestBody();
-    string to_string(uint n);
 
 private:
     uint clientId;
     string clientSecret;
     string grantType;
+
+    string extractToken(string JSON);
+    string findJson(string response);
+    string tokenRequestBody();
+    string to_string(uint n);
 };
 
 #endif

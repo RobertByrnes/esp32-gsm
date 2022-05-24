@@ -21,13 +21,8 @@
   },
   {
     "Sourcefile": "c:\\code\\toit-sim800l-1\\build\\sketch\\CellularNetwork.cpp.cpp",
-    "Include": "HTTPClient.h",
-    "Includepath": "C:\\Users\\robby\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\1.0.6\\libraries\\HTTPClient\\src"
-  },
-  {
-    "Sourcefile": "c:\\code\\toit-sim800l-1\\build\\sketch\\CellularNetwork.cpp.cpp",
-    "Include": "WiFiClientSecure.h",
-    "Includepath": "C:\\Users\\robby\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\1.0.6\\libraries\\WiFiClientSecure\\src"
+    "Include": "ArduinoHttpClient.h",
+    "Includepath": "C:\\Users\\robby\\Documents\\Arduino\\libraries\\ArduinoHttpClient\\src"
   },
   {
     "Sourcefile": "c:\\code\\toit-sim800l-1\\build\\sketch\\CellularNetwork.cpp.cpp",
@@ -100,17 +95,22 @@
     "Includepath": ""
   },
   {
-    "Sourcefile": "C:\\Users\\robby\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\1.0.6\\libraries\\HTTPClient\\src\\HTTPClient.cpp",
+    "Sourcefile": "C:\\Users\\robby\\Documents\\Arduino\\libraries\\ArduinoHttpClient\\src\\HttpClient.cpp",
     "Include": "",
     "Includepath": ""
   },
   {
-    "Sourcefile": "C:\\Users\\robby\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\1.0.6\\libraries\\WiFiClientSecure\\src\\WiFiClientSecure.cpp",
+    "Sourcefile": "C:\\Users\\robby\\Documents\\Arduino\\libraries\\ArduinoHttpClient\\src\\URLEncoder.cpp",
     "Include": "",
     "Includepath": ""
   },
   {
-    "Sourcefile": "C:\\Users\\robby\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\1.0.6\\libraries\\WiFiClientSecure\\src\\ssl_client.cpp",
+    "Sourcefile": "C:\\Users\\robby\\Documents\\Arduino\\libraries\\ArduinoHttpClient\\src\\WebSocketClient.cpp",
+    "Include": "",
+    "Includepath": ""
+  },
+  {
+    "Sourcefile": "C:\\Users\\robby\\Documents\\Arduino\\libraries\\ArduinoHttpClient\\src\\b64.cpp",
     "Include": "",
     "Includepath": ""
   },

@@ -20,7 +20,7 @@ public:
 
     ~CellularNetwork();
 
-    bool initSim(const char simPin);
+    bool initSim(const char *simPin);
     bool connectNetwork();
 };
 

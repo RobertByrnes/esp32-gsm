@@ -8,7 +8,14 @@ CellularNetwork::CellularNetwork(const char *apn, const char *gprs_user, const c
 // Destructor
 CellularNetwork::~CellularNetwork() {}
 
-bool CellularNetwork::initSim(const char simPin) {
+/**
+ * @brief Make up to 5 attempts to connect to the mobile network.
+ * 
+ * @param simPin const char *
+ * 
+ * @return bool
+ */
+bool CellularNetwork::initSim(const char *simPin) {
    // Set GSM module baud rate and UART pins
   SerialAT.begin(BAUD_RATE, SERIAL_8N1, MODEM_RX, MODEM_TX);
   delay(3000);
