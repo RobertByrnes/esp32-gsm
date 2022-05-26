@@ -11,11 +11,11 @@
 
 // Modem
 TinyGsm modem(SerialAT);
-CellularNetwork network(APN, GPRS_USER, GPRS_PASSWORD,  modem); // explore passing modem by reference
+CellularNetwork network(APN, GPRS_USER, GPRS_PASSWORD, modem); // explore passing modem by reference
 
 // HTTP(S) Client
 TinyGsmClientSecure client(modem);
-HttpClient http(client, UPDATE_HOST, 443);
+HttpClient http(client, HOST, 443);
 
 // Authentication
 OAuth2 authHandler(OAUTH_HOST, OAUTH_TOKEN_PATH);
@@ -23,11 +23,15 @@ OAuth2 authHandler(OAUTH_HOST, OAUTH_TOKEN_PATH);
 //  Updates
 GSMFirmwareUpdater update;
 
-
+/**
+ * @brief Connect to the mobile network.
+ * 
+ * @return void
+ */ 
 void makeGSMConnection()
 {
   if (network.connectNetwork()) {
-      Serial.println("[+] Connection to mobile network OK");
+      Serial.println("[+] Connected to mobile network OK");
   } else {
       Serial.println("[-] failed to connect to mobile network");
   }
@@ -53,16 +57,16 @@ void setupSIM800L_GPIO()
  * 
  * @return void
  */ 
-void setupWifiConnection()
-{
-  WiFi.mode(WIFI_MODE_STA);
-  WiFi.begin(SSID, PASSWORD);
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    delay(500);
-    Serial.print(".");
-  }
-}
+// void setupWifiConnection()
+// {
+//   WiFi.mode(WIFI_MODE_STA);
+//   WiFi.begin(SSID, PASSWORD);
+//   while (WiFi.status() != WL_CONNECTED)
+//   {
+//     delay(500);
+//     Serial.print(".");
+//   }
+// }
 
 void setup()
 {
@@ -73,6 +77,8 @@ void setup()
   Serial.println("[+] Initializing modem...");
 
   network.initSim(SIM_PIN);
+
+  authHandler.setGrantType(GRANT_TYPE, CLIENT_ID, CLIENT_SECRET);
 }
 
 /**
@@ -83,21 +89,24 @@ void setup()
 void connectServer()
 {
   std::string completeResponse = "";
-  std::string accessToken = "";
+  const char *accessToken = "";
 
   makeGSMConnection();
 
-  Serial.printf("[+] Connected to APN: ", APN);
-  Serial.printf("[+] Connecting to ", SERVER);
+  Serial.print("[+] Connected to APN: ");
+  Serial.println(APN);
+  Serial.print("[+] Connecting to ");
+  Serial.println(SERVER);
 
   if (!client.connect(SERVER, PORT)) {
     Serial.println("[-] Connecting to server failed");
   } else {
     Serial.println("[+] Performing HTTP POST request to OAuth Server");
 
-    client.print(authHandler.personalAccessClientTokenRequestString().c_str()); // better handling of c_str()
+    client.print(authHandler.personalAccessClientTokenRequestString());
 
-    Serial.printf("[D] Request string to get token: ", authHandler.personalAccessClientTokenRequestString(), "\n");
+    Serial.print("[D] Request string to get token: ");
+    Serial.println(authHandler.personalAccessClientTokenRequestString());
 
     unsigned long timeout = millis();
 
@@ -116,9 +125,8 @@ void connectServer()
     Serial.println(F("[+] GPRS disconnected"));
 
     accessToken = authHandler.getToken(completeResponse);
-    Serial.printf("[+] Access token: ", accessToken, "\n");
-
-    timeout = millis();
+    Serial.print("[+] Access token: ");
+    Serial.println(accessToken);
   }
 }
 
@@ -128,8 +136,13 @@ void loop()
     PREVIOUS_MILLIS = millis();
     RESTART_COUNTER++;
     // connectServer();
-    update.performUpdate(UPDATE_HOST, PORT, http, client);
+
     makeGSMConnection();
+
+    if (client.connect(HOST, PORT)) {
+      update.performUpdate(UPDATE_URL, http, client);
+    }
+
     if (RESTART_COUNTER >= 5) {
       ESP.restart();
     }

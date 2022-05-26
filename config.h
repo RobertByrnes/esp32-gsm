@@ -18,7 +18,12 @@ const char *SIM_PIN = "";
 const char SERVER[] = "draperbiotech.clystnet.com"; // Base url
 const char AUTH_PATH[] = "/oauth/token"; // oAuth token path
 const char RESOURCE_PATH[] = "/api/readings"; // Resource path
-const int PORT = 443; // Server port number
+const uint16_t PORT = 443; // Server port number
+
+// location of firmware file on external web server
+// change to your actual .bin location
+const char HOST[] = "www.globalrbdev.uk";
+const char *UPDATE_URL = "www.globalrbdev.uk/bin/firmware.bin";
 
 // End point details for the API
 const char DEVICE_ID[] = "";
@@ -39,11 +44,6 @@ const char *PASSWORD = "kF4QMhzc3xcS"; // WiFi Network Password
 
 // ESP restart counter
 unsigned int RESTART_COUNTER = 0;
-
-// location of firmware file on external web server
-// change to your actual .bin location
-#define UPDATE_HOST "http://www.globalrbdev.uk"
-#define UPDATE_URL "/bin/main.ino.bin"
 
 // Global variables
 int totalLength;       //total size of firmware
