@@ -2,11 +2,10 @@
 #include "config.h"
 #include <CellularNetwork.h>
 #include <OAuth2.h>
-#include <WiFi.h>
-#include <HttpClient.h>
 #include <Update.h>
 #include <StreamDebugger.h>
-#include "GSMFirmwareUpdater.h"
+#include <CRC32.h>
+#include "WiFi_FirmwareUpdater.h"
 
 
 // Modem
@@ -15,13 +14,14 @@ CellularNetwork network(APN, GPRS_USER, GPRS_PASSWORD, modem); // explore passin
 
 // HTTP(S) Client
 TinyGsmClientSecure client(modem);
-HttpClient http(client, HOST, 443);
+// HttpClient http(client, HOST, 443);
 
 // Authentication
 OAuth2 authHandler(OAUTH_HOST, OAUTH_TOKEN_PATH);
 
 //  Updates
-GSMFirmwareUpdater update;
+WiFi_FirmwareUpdater update;
+CRC32 crc;
 
 /**
  * @brief Connect to the mobile network.
@@ -92,8 +92,10 @@ void connectServer()
   const char *accessToken = "";
 
   makeGSMConnection();
-
-  Serial.print("[+] Connected to APN: ");
+  // if (network.isNetworkConnected()) {
+  //   Serial.print("[+] Connected to APN: ");
+  // }
+  
   Serial.println(APN);
   Serial.print("[+] Connecting to ");
   Serial.println(SERVER);
@@ -139,8 +141,10 @@ void loop()
 
     makeGSMConnection();
 
-    if (client.connect(HOST, PORT)) {
-      update.performUpdate(UPDATE_URL, http, client);
+    if (client.connect(SERVER, PORT)) {
+      Serial.print("[+] Connected to host: ");
+      Serial.println(SERVER);
+      update.performUpdate(UPDATE_URL, UPDATE_HOST, PORT, crc, client, network);
     }
 
     if (RESTART_COUNTER >= 5) {

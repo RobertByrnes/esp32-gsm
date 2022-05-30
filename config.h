@@ -22,8 +22,8 @@ const uint16_t PORT = 443; // Server port number
 
 // location of firmware file on external web server
 // change to your actual .bin location
-const char HOST[] = "www.globalrbdev.uk";
-const char *UPDATE_URL = "www.globalrbdev.uk/bin/firmware.bin";
+const char *UPDATE_HOST = "draperbiotech.clystnet.com";
+const char *UPDATE_URL = "draperbiotech.clystnet.com/public/firmware.bin";
 
 // End point details for the API
 const char DEVICE_ID[] = "";
@@ -40,7 +40,7 @@ const char *PASSWORD = "kF4QMhzc3xcS"; // WiFi Network Password
 // Set the server polling time
 // #define CONNECTION_INTERVAL 900000 // every 15mins
 // #define CONNECTION_INTERVAL 300000 // every 5mins
-#define CONNECTION_INTERVAL 60000 // every 1min
+#define CONNECTION_INTERVAL 60000U // every 1min
 
 // ESP restart counter
 unsigned int RESTART_COUNTER = 0;
