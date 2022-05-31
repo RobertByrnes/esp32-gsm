@@ -3,7 +3,7 @@
 #include "CellularNetwork.h"
 #include "OAuth2.h"
 #include <WiFi.h>
-// #include <HTTPClient.h>
+#include <HTTPClient.h>
 #include <ArduinoHttpClient.h>
 #include <Update.h>
 #include <StreamDebugger.h>
