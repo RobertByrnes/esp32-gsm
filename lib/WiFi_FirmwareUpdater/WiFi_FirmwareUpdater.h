@@ -14,12 +14,14 @@ public:
     WiFi_FirmwareUpdater(const char* ssid, const char* password);
     ~WiFi_FirmwareUpdater();
 
+    void updateFirmware(const char *updateUrl);
+
 private:
     int totalLength; // Total size of firmware.
     int currentLength; // Current size of the written firmware.
 
     void connectWifi();
-    void updateFirmware(uint8_t *data, size_t len);
+    void processUpdate(uint8_t *data, size_t len);
 };
 
 #endif

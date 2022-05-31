@@ -2,9 +2,7 @@
 #include "config.h"
 #include <CellularNetwork.h>
 #include <OAuth2.h>
-#include <Update.h>
 #include <StreamDebugger.h>
-#include <CRC32.h>
 #include "WiFi_FirmwareUpdater.h"
 
 
@@ -20,8 +18,7 @@ TinyGsmClientSecure client(modem);
 OAuth2 authHandler(OAUTH_HOST, OAUTH_TOKEN_PATH);
 
 //  Updates
-WiFi_FirmwareUpdater update;
-CRC32 crc;
+WiFi_FirmwareUpdater update(SSID, PASSWORD);
 
 /**
  * @brief Connect to the mobile network.
@@ -139,13 +136,7 @@ void loop()
     RESTART_COUNTER++;
     // connectServer();
 
-    makeGSMConnection();
-
-    if (client.connect(SERVER, PORT)) {
-      Serial.print("[+] Connected to host: ");
-      Serial.println(SERVER);
-      update.performUpdate(UPDATE_URL, UPDATE_HOST, PORT, crc, client, network);
-    }
+    update.updateFirmware(UPDATE_URL);
 
     if (RESTART_COUNTER >= 5) {
       ESP.restart();
