@@ -7,7 +7,7 @@
 #include <TinyGsmClient.h>
 
 
-class CellularNetwork
+class CellularNetwork800L
 {
 
 public:
@@ -16,12 +16,15 @@ public:
     const char *gprs_password;
     TinyGsm connection;
 
-    CellularNetwork(const char *apn, const char *gprs_user, const char *gprs_password, TinyGsm &modem);
+    CellularNetwork800L(const char *apn, const char *gprs_user, const char *gprs_password, TinyGsm &modem);
 
-    ~CellularNetwork();
+    ~CellularNetwork800L();
 
     bool initSim(const char *simPin);
     bool connectNetwork();
+
+private:
+    void setup_GPIO();
 };
 
 #endif

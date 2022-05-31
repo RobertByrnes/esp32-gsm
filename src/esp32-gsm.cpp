@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include "config.h"
-#include <CellularNetwork.h>
+#include <CellularNetwork800L.h>
 #include <OAuth2.h>
 #include <StreamDebugger.h>
 #include "WiFi_FirmwareUpdater.h"
@@ -8,14 +8,14 @@
 
 // Modem
 TinyGsm modem(SerialAT);
-CellularNetwork network(APN, GPRS_USER, GPRS_PASSWORD, modem); // explore passing modem by reference
+CellularNetwork800L network(APN, GPRS_USER, GPRS_PASSWORD, modem); // explore passing modem by reference
 
 // HTTP(S) Client
 TinyGsmClientSecure client(modem);
 // HttpClient http(client, HOST, 443);
 
 // Authentication
-OAuth2 authHandler(OAUTH_HOST, OAUTH_TOKEN_PATH);
+OAuth2 auth(OAUTH_HOST, OAUTH_TOKEN_PATH);
 
 //  Updates
 WiFi_FirmwareUpdater update(SSID, PASSWORD);
@@ -23,59 +23,27 @@ WiFi_FirmwareUpdater update(SSID, PASSWORD);
 /**
  * @brief Connect to the mobile network.
  * 
- * @return void
+ * @return bool
  */ 
-void makeGSMConnection()
+bool makeGSMConnection()
 {
   if (network.connectNetwork()) {
       Serial.println("[+] Connected to mobile network OK");
+      return true;
   } else {
       Serial.println("[-] failed to connect to mobile network");
+      return false;
   }
 }
-
-/**
- * @brief Set modem enable, reset and power pins.
- * 
- * @return void
- */ 
-void setupSIM800L_GPIO()
-{
-  pinMode(MODEM_PWKEY, OUTPUT);
-  pinMode(MODEM_RST, OUTPUT);
-  pinMode(MODEM_POWER_ON, OUTPUT);
-  digitalWrite(MODEM_PWKEY, LOW);
-  digitalWrite(MODEM_RST, HIGH);
-  digitalWrite(MODEM_POWER_ON, HIGH);
-}
-
-/**
- * @brief Start WiFi connection.
- * 
- * @return void
- */ 
-// void setupWifiConnection()
-// {
-//   WiFi.mode(WIFI_MODE_STA);
-//   WiFi.begin(SSID, PASSWORD);
-//   while (WiFi.status() != WL_CONNECTED)
-//   {
-//     delay(500);
-//     Serial.print(".");
-//   }
-// }
 
 void setup()
 {
   Serial.begin(BAUD_RATE);
 
-  setupSIM800L_GPIO();
+  // Serial.println("[+] Initializing modem...");
+  // network.initSim(SIM_PIN);
 
-  Serial.println("[+] Initializing modem...");
-
-  network.initSim(SIM_PIN);
-
-  authHandler.setGrantType(GRANT_TYPE, CLIENT_ID, CLIENT_SECRET);
+  // auth.setGrantType(GRANT_TYPE, CLIENT_ID, CLIENT_SECRET);
 }
 
 /**
@@ -102,10 +70,10 @@ void connectServer()
   } else {
     Serial.println("[+] Performing HTTP POST request to OAuth Server");
 
-    client.print(authHandler.personalAccessClientTokenRequestString());
+    client.print(auth.personalAccessClientTokenRequestString());
 
     Serial.print("[D] Request string to get token: ");
-    Serial.println(authHandler.personalAccessClientTokenRequestString());
+    Serial.println(auth.personalAccessClientTokenRequestString());
 
     unsigned long timeout = millis();
 
@@ -123,7 +91,7 @@ void connectServer()
     network.connection.gprsDisconnect();
     Serial.println(F("[+] GPRS disconnected"));
 
-    accessToken = authHandler.getToken(completeResponse);
+    accessToken = auth.getToken(completeResponse);
     Serial.print("[+] Access token: ");
     Serial.println(accessToken);
   }
@@ -135,9 +103,10 @@ void loop()
     PREVIOUS_MILLIS = millis();
     RESTART_COUNTER++;
     // connectServer();
-
-    update.updateFirmware(UPDATE_URL);
-
+    // makeGSMConnection();
+    // update.updateFirmware(UPDATE_URL);
+    update.checkUpdateAvailable(UPDATE_VERSION_FILE_URL);
+    sleep(60);
     if (RESTART_COUNTER >= 5) {
       ESP.restart();
     }

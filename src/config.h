@@ -23,7 +23,8 @@ const uint16_t PORT = 443; // Server port number
 // location of firmware file on external web server
 // change to your actual .bin location
 const char *UPDATE_HOST = "draperbiotech.clystnet.com";
-const char *UPDATE_URL = "draperbiotech.clystnet.com/public/firmware.bin";
+const char *UPDATE_URL = "https://draperbiotech.clystnet.com/firmware.bin"; // must include either http:// or https://
+const char *UPDATE_VERSION_FILE_URL = "https://draperbiotech.clystnet.com/firmware.txt";
 
 // End point details for the API
 const char DEVICE_ID[] = "";
@@ -37,9 +38,17 @@ const char *GPRS_PASSWORD = "p"; // GPRS Password
 const char *SSID = "CrowdedHouse"; // WiFi Network Name
 const char *PASSWORD = "kF4QMhzc3xcS"; // WiFi Network Password
 
-// Set the server polling time
-// #define CONNECTION_INTERVAL 900000 // every 15mins
-// #define CONNECTION_INTERVAL 300000 // every 5mins
+// Set the server connection interval
+// #define CONNECTION_INTERVAL 3600000U // every hour
+// #define CONNECTION_INTERVAL 3000000U // every 50mins
+// #define CONNECTION_INTERVAL 2400000U // every 40mins
+// #define CONNECTION_INTERVAL 1800000U // every 30mins
+// #define CONNECTION_INTERVAL 1200000U // every 20mins
+// #define CONNECTION_INTERVAL 900000U // every 15mins
+// #define CONNECTION_INTERVAL 600000U // every 10mins
+// #define CONNECTION_INTERVAL 300000U // every 5mins
+// #define CONNECTION_INTERVAL 180000U // every 3mins
+// #define CONNECTION_INTERVAL 120000U // every 2mins
 #define CONNECTION_INTERVAL 60000U // every 1min
 
 // ESP restart counter
