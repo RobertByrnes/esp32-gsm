@@ -104,8 +104,11 @@ void loop()
     RESTART_COUNTER++;
     // connectServer();
     // makeGSMConnection();
-    // update.updateFirmware(UPDATE_URL);
-    update.checkUpdateAvailable(UPDATE_VERSION_FILE_URL);
+
+    if (update.checkUpdateAvailable(UPDATE_VERSION_FILE_URL)) {
+      update.updateFirmware(UPDATE_URL);
+    }
+    
     sleep(60);
     if (RESTART_COUNTER >= 5) {
       ESP.restart();

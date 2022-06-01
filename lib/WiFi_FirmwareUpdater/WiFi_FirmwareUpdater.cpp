@@ -1,6 +1,5 @@
 #include "WiFi_FirmwareUpdater.h"
 
-
 // Constructor
 WiFi_FirmwareUpdater::WiFi_FirmwareUpdater(const char* ssid, const char* password):
    ssid(ssid), 
@@ -96,20 +95,58 @@ bool WiFi_FirmwareUpdater::checkUpdateAvailable(const char *verisonFileUrl)
   this->getRequest(verisonFileUrl);
 
   if (this->respCode == 200) {
-    int len = totalLength = this->getSize(); // get length of doc (is -1 when Server sends no Content-Length header) 
-    uint8_t buff[128] = { 0 }; // create buffer for read
-    WiFiClient * stream = this->getStreamPtr(); // get tcp stream
-    Serial.println("[i] Checking firmware version...");
-    String version = this->getString().substring(version.lastIndexOf("=") + 1); // grrrrr had to use String
-    Serial.printf("[i] Firmware Version available: %s\n", version);
+    int len = totalLength = this->getSize(); // get length of doc (is -1 when Server sends no Content-Length header)
+    Serial.println("[i] Checking firmware versions...");
+    int currentVersion = this->getVersionNumberFromString(true);
+    int availableVersion = this->getVersionNumberFromString(false);
+    Serial.printf("[i] Current firmware version: %u\n", currentVersion);
+    Serial.printf("[i] Firmware version available: %u\n", availableVersion);
+    Serial.println("[i] Comparing versions...");
+
+    if (availableVersion > currentVersion) {
+      Serial.println("[i] Firware upgrade available, will download");
+    } else {
+      Serial.println("[i] The current Firware version is the latest version");
+    }
+  
   } else {
+    Serial.print("[!] Memory: ");
+    Serial.println(ESP.getMaxAllocHeap());
     Serial.println("[-] Cannot download firmware version file. Only HTTP response 200 is supported.");  
     this->end(); 
-    WiFi.disconnect();
+    while (!WiFi.disconnect()) {
+      sleep(1);
+    };
     return false;
   }
   
   this->end(); 
-  WiFi.disconnect();
+  while (!WiFi.disconnect()) {
+    sleep(1);
+  };
   return true;
+}
+
+int WiFi_FirmwareUpdater::getVersionNumberFromString(bool currentVersionCheck) 
+{
+  std::string version;
+
+  if (currentVersionCheck == false) {
+    version = this->getString().c_str();
+    // Serial.print("[D] std::string version: "); Serial.println(version.c_str());
+    version = version.substr(version.find_first_of("=") + 1);
+    // Serial.print("[D] std::string version number: "); Serial.println(version.c_str());
+  } else {
+    version = CURRENT_VERSION;
+  }
+
+  std::string output;
+  output.reserve(version.size()); // optional, avoids buffer reallocations in the loop
+  for (size_t i = 0; i < version.size(); ++i) {
+    if (version[i] != '.') {
+      output += version[i];
+    }
+  }
+  // Serial.print("[D] std::string output: "); Serial.println(output.c_str());
+  return std::stoi( output );
 }

@@ -3,7 +3,6 @@
 
 using namespace std;
 
-
 // OAuth Token
 const string OAUTH_HOST = "draperbiotech.clystnet.com";
 const string OAUTH_TOKEN_PATH = "/oauth/token";

@@ -4,6 +4,8 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <Update.h>
+#include "../../src/version.h"
+#include "string.h"
 
 class WiFi_FirmwareUpdater: public HTTPClient
 {
@@ -25,6 +27,7 @@ private:
     void connectWifi();
     void getRequest(const char *url);
     void processUpdate(uint8_t *data, size_t len);
+    int getVersionNumberFromString(bool currentVersionCheck);
 };
 
 #endif
