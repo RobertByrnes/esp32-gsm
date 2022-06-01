@@ -42,6 +42,7 @@ jobs:
     - name: Move firmware to root 
       run: |
         pwd
+        ls -lha
         sudo cp /home/runner/work/esp32-gsm/esp32-gsm/.pio/build/esp-wrover-kit/firmware.bin /home/runner/work/esp32-gsm/esp32-gsm/firmare.bin
 
     - name: Commit firmware.bin to repo
