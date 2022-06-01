@@ -40,7 +40,7 @@ jobs:
     - name: Move firmware to root 
       run: |
         pwd
-        cp .pio/build/esp-wrover-kit/firmware.bin /firmare.bin
+        sudo cp .pio/build/esp-wrover-kit/firmware.bin /firmare.bin
 
     - name: Commit firmware.bin to repo
       uses: EndBug/add-and-commit@v9
