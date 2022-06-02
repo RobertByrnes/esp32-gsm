@@ -26,8 +26,8 @@ private:
 
     void connectWifi();
     void getRequest(const char *url);
-    void processUpdate(uint8_t *data, size_t len);
     int getVersionNumberFromString(bool currentVersionCheck);
+    void processUpdate(uint8_t *data, size_t len);
 };
 
 #endif
