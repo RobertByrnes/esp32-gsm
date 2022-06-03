@@ -14,11 +14,10 @@ public:
     DataUploadApi(CellularNetwork800L &network, TinyGsmClientSecure &client, const string &host, const string &auth_path);
     ~DataUploadApi();
 
-    bool makeGSMConnection();
     void connectServer();
 
 private:
-
+    bool makeGSMConnection();
 };
 
 #endif

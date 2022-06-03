@@ -1,9 +1,13 @@
 #include "DataUploadApi.h"
 
 
-// Constructor
+// Constructor (and parent constructor)
 DataUploadApi::DataUploadApi(CellularNetwork800L &network, TinyGsmClientSecure &client, const string &host, const string &auth_path): 
-    OAuth2(host, auth_path), modem(network), https_client(client)  {}
+  OAuth2(host, auth_path), modem(network), https_client(client)  {
+    this->setGrantType(GRANT_TYPE, CLIENT_ID, CLIENT_SECRET);
+    Serial.println("[+] Initializing modem...");
+    this->modem.initSim(SIM_PIN);
+  }
 
 // Destructor
 DataUploadApi::~DataUploadApi() {}
@@ -19,11 +23,11 @@ void DataUploadApi::connectServer()
   std::string completeResponse = "";
   const char *accessToken = "";
 
-  makeGSMConnection();
-  // if (network.isNetworkConnected()) {
-  //   Serial.print("[+] Connected to APN: ");
-  // }
+  if (!this->makeGSMConnection()) {
+    return;
+  }
   
+  Serial.print("[+] Connected to APN: ");
   Serial.println(APN);
   Serial.print("[+] Connecting to ");
   Serial.println(SERVER);
