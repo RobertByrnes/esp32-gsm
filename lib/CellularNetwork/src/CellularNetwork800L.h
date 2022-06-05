@@ -2,7 +2,8 @@
 #define CELLULAR_NETWORK_H
 
 #include <Arduino.h>
-#include "esp32_config.h"
+#include <modem.h>
+#include <credentials.h>
 #include <HardwareSerial.h>
 #include <TinyGsmClient.h>
 

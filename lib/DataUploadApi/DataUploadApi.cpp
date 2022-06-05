@@ -1,6 +1,9 @@
 #include "DataUploadApi.h"
 
 
+// SIM card PIN, leave empty if not defined
+const char *SIM_PIN = "";
+
 // Constructor (and parent constructor)
 DataUploadApi::DataUploadApi(CellularNetwork800L &network, TinyGsmClientSecure &client, const string &host, const string &auth_path): 
   OAuth2(host, auth_path), modem(network), https_client(client)  {
@@ -18,7 +21,7 @@ DataUploadApi::~DataUploadApi() {}
  * reading DHT sensor and sending all latest readings.  Resets counters.
  *
  */
-void DataUploadApi::connectServer()
+void DataUploadApi::connectServer(const char *apn, const char *server, const uint16_t &port)
 {
   std::string completeResponse = "";
   const char *accessToken = "";
@@ -28,11 +31,11 @@ void DataUploadApi::connectServer()
   }
   
   Serial.print("[+] Connected to APN: ");
-  Serial.println(APN);
+  Serial.println(apn);
   Serial.print("[+] Connecting to ");
-  Serial.println(SERVER);
+  Serial.println(server);
 
-  if (!https_client.connect(SERVER, PORT)) {
+  if (!https_client.connect(server, port)) {
     Serial.println("[-] Connecting to server failed");
   } else {
     Serial.println("[+] Performing HTTP POST request to OAuth Server");
