@@ -21,10 +21,10 @@ string OAuth2::extractToken(string JSON) // private
   int beginningOfToken = JSON.find_last_of(":") + 2;
   int endOfToken = JSON.find_last_of("\"}") - 1;
  
-  string accesToken = JSON.substr(beginningOfToken, endOfToken - beginningOfToken);
+  string accessToken = JSON.substr(beginningOfToken, endOfToken - beginningOfToken);
 
-  if (accesToken.length() > 1)
-    return accesToken;
+  if (accessToken.length() > 1)
+    return accessToken;
   else
     return string("");
 }
@@ -53,17 +53,17 @@ string OAuth2::findJson(string response) // private
  * 
  * @param httpResponse std::string
  * 
- * @return const char * (either the token or an empty string)
+ * @return std::string (either the token or an empty string)
  */
-const char * OAuth2::getToken(string httpResponse) // public
+string OAuth2::getToken(string httpResponse) // public
 {
     string parsedResponse = this->findJson(httpResponse);
 
     if (parsedResponse != "") {
-      return this->extractToken(parsedResponse).c_str();
+      return this->extractToken(parsedResponse);
     } else {
       string notFound = "";
-      return notFound.c_str();
+      return notFound;
     }
 }
 

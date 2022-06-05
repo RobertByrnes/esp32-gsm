@@ -1,6 +1,6 @@
 .pio/
 .vscode/
 build/
-config.h
+src/config.h
 esp32_config.h
 *.txt

@@ -17,7 +17,7 @@ public:
     ~OAuth2();
 
     void setGrantType(const string &grantType, const uint clientID, const string &clientSecret);
-    const char * getToken(string httpResponse);
+    string getToken(string httpResponse);
     const char * personalAccessClientTokenRequestString();
 
 private:
