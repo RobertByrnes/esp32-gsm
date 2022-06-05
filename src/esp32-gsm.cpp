@@ -36,6 +36,18 @@ DataUploadApi api(network, client, OAUTH_HOST, OAUTH_TOKEN_PATH);
 // Firmware Updates
 WiFi_FirmwareUpdater update(SSID, PASSWORD, CURRENT_VERSION);
 
+void memoryProfile(std::string taskHandle, TaskHandle_t &task) {
+  Serial.println("*******************************");
+  Serial.printf("App Size: %u\n", ESP.getSketchSize());
+  Serial.printf("Free App Space: %u\n", ESP.getFreeSketchSpace());
+  Serial.printf("Psram Size: %u\n", ESP.getPsramSize());
+  Serial.printf("Free Psram: %u\n", ESP.getFreePsram());
+  Serial.printf("Heap Size: %u\n", ESP.getHeapSize()); 
+  Serial.printf("Free Heap: %u\n", ESP.getFreeHeap());
+  Serial.print(String(taskHandle.c_str()) + "task_1, stack not used: ");
+  Serial.println(uxTaskGetStackHighWaterMark(task));
+  Serial.println("*******************************");
+}
 
 /**
  * @brief Interrupt service routine callback func,
@@ -88,7 +100,7 @@ void IRAM_ATTR core_1_ISR_2()
  */
 static void core_0_task(void *pvParameters)
 {
-  Serial.print( "[i] Task_1 running on: core " );
+  Serial.print("[i] Task_1 running on: core ");
   Serial.println( xPortGetCoreID() );
 
   // ISR 1
@@ -99,6 +111,7 @@ static void core_0_task(void *pvParameters)
 
   for (;;) {
     if (interruptCounter_1 > 0) {
+      memoryProfile("task_1", task_1);
       portENTER_CRITICAL(&timerMux_1);
       interruptCounter_1--;
       portEXIT_CRITICAL(&timerMux_1);
@@ -122,7 +135,7 @@ static void core_0_task(void *pvParameters)
  */
 static void core_1_task(void *pvParameters)
 {
-  Serial.print( "[i] Task_2 running on: core " );
+  Serial.print("[i] Task_2 running on: core ");
   Serial.println( xPortGetCoreID() );
 
   // ISR 2
@@ -139,6 +152,7 @@ static void core_1_task(void *pvParameters)
 
   for (;;) {
     if (interruptCounter_2 > 0) {
+      memoryProfile("task_2", task_2);
       portENTER_CRITICAL(&timerMux_2);
       interruptCounter_2--;
       portEXIT_CRITICAL(&timerMux_2);
@@ -146,19 +160,21 @@ static void core_1_task(void *pvParameters)
       // connect to the OAuth server
       api.connectServer(APN, SERVER, PORT);
     }
+    
 
-    if (interruptCounter_3 > 0) {
-      portENTER_CRITICAL(&timerMux_3);
-      interruptCounter_3--;
-      portEXIT_CRITICAL(&timerMux_3);
+    // if (interruptCounter_3 > 0) {
+    //   portENTER_CRITICAL(&timerMux_3);
+    //   interruptCounter_3--;
+    //   portEXIT_CRITICAL(&timerMux_3);
 
-      // check for and perform firmware update
-      if (update.checkUpdateAvailable(UPDATE_VERSION_FILE_URL)) {
-        update.updateFirmware(UPDATE_URL);
-      }
-    }
+    //   // check for and perform firmware update
+    //   if (update.checkUpdateAvailable(UPDATE_VERSION_FILE_URL)) {
+    //     update.updateFirmware(UPDATE_URL);
+    //   }
+    // }
   }
 }
+
 
 void setup()
 {
@@ -189,11 +205,25 @@ void setup()
       1 // pin task to core 1
   ); 
 
-  Serial.print("[D] task_1, stack not used: ");
-  Serial.println(uxTaskGetStackHighWaterMark(task_1));
-  
-  Serial.print("[D] task_2, stack not used: ");
-  Serial.println(uxTaskGetStackHighWaterMark(task_2));
+  // Serial.print("[D] task_1, stack not used: ");
+  // Serial.println(uxTaskGetStackHighWaterMark(task_1));
+
+  // Serial.print("[D] task_2, stack not used: ");
+  // Serial.println(uxTaskGetStackHighWaterMark(task_2));
 }
 
-void loop() { vTaskDelete(NULL); }
+void loop()
+{
+  vTaskDelete(NULL);
+
+  // Memory Use Debug
+  // unsigned long currentMillis = millis();
+
+  // if (currentMillis - previousMillis > printInterval) {
+  //   previousMillis = currentMillis; 
+  //   Serial.printf("[D] Free app space: %u\n", ESP.getFreeSketchSpace());
+  //   Serial.printf("[D] Free Psram: %u\n", ESP.getFreePsram()); 
+  //   Serial.printf("[D] Free Heap: %u\n", ESP.getFreeHeap());
+  // }
+  
+}
