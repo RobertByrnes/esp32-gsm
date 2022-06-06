@@ -5,7 +5,7 @@
 using namespace std;
 
 const string GRANT_TYPE = "client_credentials";
-const uint CLIENT_ID = 6;
-const string CLIENT_SECRET = "RN6aJMOXOOSKcNBND2YOKuUQMKlKATgNu3iSYoHn";
+const uint CLIENT_ID = 3;
+const string CLIENT_SECRET = "jGDjmHMOGNfuClU9oFVCHpFxv0dbeLmOu1i3wkW2";
 
 #endif

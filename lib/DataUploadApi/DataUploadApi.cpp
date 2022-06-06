@@ -5,7 +5,7 @@
 #define SERIAL_CONNECTED
 
 // Default server timeout
-#define SERVER_TIMEOUT 60000U
+#define SERVER_TIMEOUT 10000L
 
 // SIM card PIN, leave empty if not defined
 const char *SIM_PIN = "";
@@ -83,6 +83,8 @@ void DataUploadApi::connectServer(const char *apn, const char *server, const uin
     Serial.print("[+] Access token: ");
     Serial.println(String(accessToken.c_str()));
 #endif
+
+  timeout = millis();
   }
 }
 
@@ -105,3 +107,13 @@ bool DataUploadApi::makeGSMConnection()
     return false;
   }
 }
+
+// string to send data in request
+// String data = ("{\"udid\":\"" + String(udid) + "\", \"reading\":\"" + reading + "\", \"temp\":\"" + temp + "\", \"humid\":\"" + humid + "\", \"auger1\":\"" + augerOneCount + "\", \"auger2\":\"" + augerTwoCount + "\", \"faultCount\":\"" + faultLineCount +"\", \"noFaultCount\":\"" + noFaultCount + "\"}");
+// client.print(String("POST ") + resourcePath + " HTTP/1.1\r\n");
+// client.print(String("Host: ") + server + "\r\n");
+// client.print(String("Authorization: Bearer " + accessToken + "\r\n"));
+// client.print(String("Accept: application/json\r\n"));
+// client.print(String("Content-Type: application/json\r\n"));
+// client.print(String("Content-Length: ") + data.length() + "\r\n\r\n");
+// client.print(data);
