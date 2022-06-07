@@ -19,11 +19,13 @@ public:
     void setGrantType(const string &grantType, const uint clientID, const string &clientSecret);
     string getToken(string httpResponse);
     const char * personalAccessClientTokenRequestString();
+    const char * postRequestString(std::string data);
 
 private:
     uint clientId;
     string clientSecret;
     string grantType;
+    string currentToken;
 
     string extractToken(string JSON);
     string findJson(string response);

@@ -10,6 +10,9 @@
 // Memory profiling - uncomment to enable
 #define PROFILE_MEMORY
 
+// Serial print verbosity - uncomment to enable output (it's a good idea to turn this off in production, unless Serial connection is available)
+#define SERIAL_VERBOSE
+
 // ESP hardware timers
 hw_timer_t *timer_1 = NULL; // to run on core 0 - mission critical timed events to run on core 0
 hw_timer_t *timer_2 = NULL; // to run on core 1 - all things GSM / WIFI / HTTP(s)
@@ -37,7 +40,9 @@ DataUploadApi api(network, client, OAUTH_HOST, OAUTH_TOKEN_PATH);
 WiFi_FirmwareUpdater update(SSID, PASSWORD, CURRENT_VERSION);
 
 #ifdef PROFILE_MEMORY
-void memoryProfile(std::string taskHandle, TaskHandle_t &task) {
+void memoryProfile(std::string taskHandle, TaskHandle_t &task)
+{
+#ifdef SERIAL_VERBOSE
   Serial.println("\n*****************************************");
   Serial.printf("App Size: %u\n", ESP.getSketchSize());
   Serial.printf("Free App Space: %u\n", ESP.getFreeSketchSpace());
@@ -48,8 +53,78 @@ void memoryProfile(std::string taskHandle, TaskHandle_t &task) {
   Serial.print(String(taskHandle.c_str()) + " stack not used: ");
   Serial.println(uxTaskGetStackHighWaterMark(task));
   Serial.println("*****************************************");
+#endif
 }
 #endif
+
+
+/**
+ * @brief Use the OAuth2 class to get formatted HTTP string to send a POST
+ * request to the OAuth server. The token is saved to a member variable
+ * of the OAuth2 class class currentToken.
+ * 
+ * @return void
+ */
+void getOAuthToken(const char *apn, const char *server, const uint16_t &port)
+{
+  std::string completeResponse = "";
+  std::string accessToken = "";
+
+  if (!network.connectNetwork()) {
+#ifdef SERIAL_VERBOSE
+    Serial.println("[-] failed to connect to mobile network");
+#endif
+    return; // better handling if it falls over
+  }
+
+#ifdef SERIAL_VERBOSE
+  Serial.println("[+] Connected to mobile network OK");
+  Serial.print("[+] Connected to APN: ");
+  Serial.println(apn);
+  Serial.print("[+] Connecting to ");
+  Serial.println(server);
+#endif
+
+  if (!client.connect(server, port)) {
+#ifdef SERIAL_VERBOSE
+    Serial.println("[-] Connecting to server failed");
+#endif
+    return; // better handling if it falls over
+  } else {
+#ifdef SERIAL_VERBOSE
+    Serial.println("[+] Performing HTTP POST request to OAuth Server");
+    Serial.print("[D] Request string to get token: ");
+    Serial.println(api.personalAccessClientTokenRequestString());
+#endif
+    client.print(api.personalAccessClientTokenRequestString());
+
+    unsigned long timeout = millis();
+    char response;
+
+    while (client.connected() && millis() - timeout < 10000L) {
+      while (client.available()) {
+        char response = client.read();
+        completeResponse += response;
+      }
+    }
+
+    client.stop();
+    accessToken = api.getToken(completeResponse);
+
+#ifdef SERIAL_VERBOSE
+    Serial.println(F("[+] Server disconnected"));
+    Serial.print("[D] Response: ");
+    Serial.println(completeResponse.c_str());
+    Serial.print("[+] Access token: ");
+    Serial.println(accessToken.c_str());
+#endif
+
+    network.connection.gprsDisconnect();
+#ifdef SERIAL_VERBOSE
+    Serial.println(F("[+] GPRS disconnected"));
+#endif
+  }
+}
 
 /**
  * @brief Interrupt service routine callback func,
@@ -144,7 +219,7 @@ static void core_1_task_1(void *pvParameters)
       portEXIT_CRITICAL(&timerMux_2);
 
       // connect to the OAuth server
-      api.connectServer(APN, SERVER, PORT);
+      getOAuthToken(APN, SERVER, PORT);
     }
 
     if (interruptCounter_3 > 9) {
@@ -187,7 +262,7 @@ void setup()
 
   xTaskCreatePinnedToCore(core_1_task_1, // Task function.
       "Task2", // name of task.
-      6000, // Stack size of task
+      15000, // Stack size of task
       NULL, // parameter of the task
       1, // priority of the task
       &task_2, // Task handle to keep track of created task

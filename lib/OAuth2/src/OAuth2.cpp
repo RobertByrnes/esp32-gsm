@@ -60,7 +60,8 @@ string OAuth2::getToken(string httpResponse) // public
     string parsedResponse = this->findJson(httpResponse);
 
     if (parsedResponse != "") {
-      return this->extractToken(parsedResponse);
+      this->currentToken = this->extractToken(parsedResponse);
+      return this->currentToken;
     } else {
       string notFound = "";
       return notFound;
@@ -74,6 +75,15 @@ string OAuth2::getToken(string httpResponse) // public
  */
 const char * OAuth2::personalAccessClientTokenRequestString() // public
 {
+  //** FORMAT **//
+  // POST /oauth/token HTTP/1.1
+  // Host: draperbiotech.clystnet.com
+  // Accept: application/json
+  // Content-Type: application/x-www-form-urlencoded
+  // Content-Length: 96
+
+  // grant_type=client_credentials&client_id=3&client_secret=jGDjmHMOGNfuClU9oFVCHpFxv0dbeLmOu1i3wkW2
+
   string requestBody = this->tokenRequestBody();
   string bodyLength = this->to_string(static_cast<uint>(requestBody.length()));
   string authRequest = "POST " + this->auth_path + " HTTP/1.1\r\n";
@@ -84,6 +94,31 @@ const char * OAuth2::personalAccessClientTokenRequestString() // public
   authRequest.append(requestBody);
 
   return authRequest.c_str();
+}
+
+const char * OAuth2::postRequestString(std::string data)
+{
+  //** FORMAT **//
+  // POST /oauth/token HTTP/1.1
+  // Host: draperbiotech.clystnet.com
+  // Authorization: Bearer ehfu4y37hf7340hqq78048tn3y4898n758943n5789n2457v8934thgjurwegojirehgr8939u843....
+  // Accept: application/json
+  // Content-Type: application/x-www-form-urlencoded
+  // Content-Length: 96
+
+  string bodyLength = this->to_string(static_cast<uint>(data.length()));
+  string postRequest = "POST " + this->auth_path + " HTTP/1.1\r\n";
+  postRequest.append("Host: " + this->host + "\r\n");
+  postRequest.append("Host: " + this->host + "\r\n");
+  postRequest.append("Authorization: Bearer " + this->currentToken + "\r\n");
+  postRequest.append("Accept: application/json\r\n");
+  postRequest.append("Content-Type: application/json\r\n");
+  postRequest.append("Content-Length: " + bodyLength + "\r\n\r\n");
+  postRequest.append(data);
+
+  return postRequest.c_str();
+
+// String data = ("{\"udid\":\"" + String(udid) + "\", \"reading\":\"" + reading + "\", \"temp\":\"" + temp + "\", \"humid\":\"" + humid + "\", \"auger1\":\"" + augerOneCount + "\", \"auger2\":\"" + augerTwoCount + "\", \"faultCount\":\"" + faultLineCount +"\", \"noFaultCount\":\"" + noFaultCount + "\"}");
 }
 
 /**

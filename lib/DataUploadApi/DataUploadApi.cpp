@@ -52,6 +52,7 @@ void DataUploadApi::connectServer(const char *apn, const char *server, const uin
   } else {
 #ifdef SERIAL_CONNECTED
     Serial.println("[+] Performing HTTP POST request to OAuth Server");
+    Serial.println(https_client.connected());
 #endif
     https_client.print(this->personalAccessClientTokenRequestString());
 #ifdef SERIAL_CONNECTED
@@ -63,7 +64,6 @@ void DataUploadApi::connectServer(const char *apn, const char *server, const uin
     while (https_client.connected() && millis() - timeout < SERVER_TIMEOUT) {
       while (https_client.available()) {
         char response = https_client.read();
-        Serial.print(response);
         completeResponse += response;
       }
     }
