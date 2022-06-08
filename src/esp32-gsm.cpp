@@ -11,7 +11,7 @@
 #define PROFILE_MEMORY
 
 // Serial print verbosity - uncomment to enable output (it's a good idea to turn this off in production, unless Serial connection is available)
-#define SERIAL_VERBOSE
+#define SERIAL_VERBOSE true
 
 // ESP hardware timers
 hw_timer_t *timer_1 = NULL; // to run on core 0 - mission critical timed events to run on core 0
