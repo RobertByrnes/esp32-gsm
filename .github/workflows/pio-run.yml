@@ -3,6 +3,7 @@ name: PlatformIO CI
 on:
   push:
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -10,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@master
 
     - name: Cache pip
       uses: actions/cache@v2
