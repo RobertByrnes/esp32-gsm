@@ -5,6 +5,9 @@
 using namespace std;
 
 
+// Update via WiFi or GSM - uncomment to use WiFi
+// #define WIFI_UPDATES
+
 // Version
 const string CURRENT_VERSION = "0.0.1"; 
 

@@ -1,8 +1,13 @@
 #include <Arduino.h>
 #include <DataUploadApi.h>
-#include "WiFi_FirmwareUpdater.h"
 #include "config.h"
 #include <ESP32TimerInterrupt.h>
+
+#ifdef WIFI_UPDATES
+  #include <WiFi_FirmwareUpdater.h>
+#else
+  #include <GSMFirmwareUpdater.h>
+#endif
 
 // User queues
 #define LED_PIN 13
@@ -37,7 +42,11 @@ TinyGsmClientSecure client(modem);
 DataUploadApi api(network, client, OAUTH_HOST, OAUTH_TOKEN_PATH);
 
 // Firmware Updates
+#ifdef WIFI_UPDATES
 WiFi_FirmwareUpdater update(SSID, PASSWORD, CURRENT_VERSION);
+#else
+GSMFirmwareUpdater update(UPDATE_URL, UPDATE_HOST, PORT);
+#endif
 
 #ifdef PROFILE_MEMORY
 void memoryProfile(std::string taskHandle, TaskHandle_t &task)
@@ -222,7 +231,7 @@ static void core_1_task_1(void *pvParameters)
       getOAuthToken(APN, SERVER, PORT);
     }
 
-    if (interruptCounter_3 > 9) {
+    if (interruptCounter_3 > 2) {
 #ifdef PROFILE_MEMORY
       memoryProfile("task_2 - update", task_2);
 #endif
@@ -230,10 +239,16 @@ static void core_1_task_1(void *pvParameters)
       interruptCounter_3 = 0;
       portEXIT_CRITICAL(&timerMux_2);
 
+#ifdef WIFI_UPDATES
       // check for and perform firmware update
       if (update.checkUpdateAvailable(UPDATE_VERSION_FILE_URL)) {
         // update.updateFirmware(UPDATE_URL);
       }
+#endif
+
+#ifndef WIFI_UPDATES
+      update.updateFirmware(client, network);
+#endif
     }
   }
 }

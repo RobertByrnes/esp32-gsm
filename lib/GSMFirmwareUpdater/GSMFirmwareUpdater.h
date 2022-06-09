@@ -13,15 +13,23 @@ class GSMFirmwareUpdater
 public:
     int totalLength;
     int currentLength;
+    const char *updateUrl;
+    const char *updateHost;
+    const uint16_t port;
 
-    GSMFirmwareUpdater();
+    GSMFirmwareUpdater(const char *UPDATE_URL, const char *UPDATE_HOST, const uint16_t &PORT);
     ~GSMFirmwareUpdater();
 
-    void performUpdate(const char *UPDATE_URL, const char *UPDATE_HOST, const uint16_t PORT, CRC32 &crc, TinyGsmClientSecure &client, CellularNetwork800L &network);
+    void updateFirmware(TinyGsmClientSecure &client, CellularNetwork800L &network);
+
 private:
+    void beginProcessingUpdate(Stream &updateSource, size_t updateSize);
+    void listDir(fs::FS &fs, const char *dirname, uint8_t levels);
     void printPercent(uint32_t readLength, uint32_t contentLength);
     bool spiffsInit(); 
-    void updateFirmware(uint8_t *data, size_t len);
+    const char *cleanUrl(const char *url);
+    void writeUpdate(uint8_t *data, size_t len);
+    void updateFromFS();
 };
 
 
