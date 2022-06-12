@@ -212,6 +212,16 @@ static void core_1_task_1(void *pvParameters)
   Serial.print("[i] Task_2 running on: core ");
   Serial.println( xPortGetCoreID() );
 
+  if (!SPIFFS.begin(false)) {
+    Serial.println("[i] SPIFFS Mount Failed");
+  }
+  
+  Serial.println("[i] SPIFFS Mounted, formatting...");
+  // SPIFFS.format();
+  Serial.println("[i] SPIFFS Formatted");
+  update.listDir(SPIFFS, "/", 0);
+  delay(5);
+
   // ISR 2
   timer_2 = timerBegin(1, 80, true); // timer_no / prescaler / countup
   timerAttachInterrupt(timer_2, &core_1_ISR_1, false); // boolean is for edge / level
@@ -219,7 +229,7 @@ static void core_1_task_1(void *pvParameters)
   timerAlarmEnable(timer_2);
 
   for (;;) {
-    if (interruptCounter_2 > 0) {
+    if (interruptCounter_2 > 10) {
 #ifdef PROFILE_MEMORY
       memoryProfile("task_2 - oauth", task_2);
 #endif
@@ -231,7 +241,7 @@ static void core_1_task_1(void *pvParameters)
       getOAuthToken(APN, SERVER, PORT);
     }
 
-    if (interruptCounter_3 > 2) {
+    if (interruptCounter_3 > 0) {
 #ifdef PROFILE_MEMORY
       memoryProfile("task_2 - update", task_2);
 #endif
@@ -252,7 +262,6 @@ static void core_1_task_1(void *pvParameters)
     }
   }
 }
-
 
 void setup()
 {

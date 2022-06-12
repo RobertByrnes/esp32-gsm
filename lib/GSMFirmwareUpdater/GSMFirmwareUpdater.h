@@ -20,13 +20,14 @@ public:
     GSMFirmwareUpdater(const char *UPDATE_URL, const char *UPDATE_HOST, const uint16_t &PORT);
     ~GSMFirmwareUpdater();
 
+    bool spiffsInit(); 
     void updateFirmware(TinyGsmClientSecure &client, CellularNetwork800L &network);
+    void listDir(fs::FS &fs, const char *dirname, uint8_t levels);
 
 private:
+    bool connectNetowrk(CellularNetwork800L &network);
     void beginProcessingUpdate(Stream &updateSource, size_t updateSize);
-    void listDir(fs::FS &fs, const char *dirname, uint8_t levels);
     void printPercent(uint32_t readLength, uint32_t contentLength);
-    bool spiffsInit(); 
     const char *cleanUrl(const char *url);
     void writeUpdate(uint8_t *data, size_t len);
     void updateFromFS();

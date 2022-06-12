@@ -3,7 +3,7 @@
 
 // Constructor
 GSMFirmwareUpdater::GSMFirmwareUpdater(const char *UPDATE_URL, const char *UPDATE_HOST, const uint16_t &PORT):
-  totalLength(0), currentLength(0), updateUrl(this->cleanUrl(UPDATE_URL)), updateHost(this->cleanUrl(UPDATE_HOST)), port(PORT)  {}
+  totalLength(0), currentLength(0), updateUrl(UPDATE_URL), updateHost(UPDATE_HOST), port(PORT)  {}
 
 // Destructor
 GSMFirmwareUpdater::~GSMFirmwareUpdater() {}
@@ -25,13 +25,21 @@ const char *GSMFirmwareUpdater::cleanUrl(const char *url)
   return string.c_str();
 }
 
+bool GSMFirmwareUpdater::connectNetowrk(CellularNetwork800L &network) // private
+{
+  if (!network.connectNetwork()) {
+    return false;
+  }
+  return true;
+}
+
 void GSMFirmwareUpdater::printPercent(uint32_t readLength, uint32_t contentLength)
 {
   // If we know the total length
   if (contentLength != -1) {
     Serial.print("\r ");
     Serial.print((100.0 * readLength) / contentLength);
-    Serial.print('%');
+    Serial.println('%');
   } else {
     Serial.println(readLength);
   }
@@ -51,6 +59,10 @@ void GSMFirmwareUpdater::printPercent(uint32_t readLength, uint32_t contentLengt
  */ 
 void GSMFirmwareUpdater::updateFirmware(TinyGsmClientSecure &client, CellularNetwork800L &network)
 {  
+  if (!this->connectNetowrk(network)) {
+    return;
+  }
+
   uint32_t   knownCRC32    = 0x6f50d767;
   uint32_t   knownFileSize = 1024;  // In case server does not send it
 
@@ -78,14 +90,14 @@ void GSMFirmwareUpdater::updateFirmware(TinyGsmClientSecure &client, CellularNet
   long timeout = millis();
   while (client.available() == 0) {
       if (millis() - timeout > 5000L) {
-          Serial.println(">>> Client Timeout !");
+          Serial.println("[-] Client Timeout");
           client.stop();
           delay(10000L);
           return;
       }
   }
 
-  Serial.println("Header received");
+  Serial.println("[D] Header received");
   uint32_t contentLength = knownFileSize;
 
   File file = SPIFFS.open("/update.bin", FILE_APPEND);
@@ -102,7 +114,7 @@ void GSMFirmwareUpdater::updateFirmware(TinyGsmClientSecure &client, CellularNet
     }
   }
 
-  Serial.println("receiving response");
+  Serial.println("[D] receiving response");
   timeout = millis();
   uint32_t readLength = 0;
   CRC32 crc;
@@ -111,12 +123,18 @@ void GSMFirmwareUpdater::updateFirmware(TinyGsmClientSecure &client, CellularNet
   this->printPercent(readLength, contentLength);
 
   while (readLength < contentLength && client.connected() && millis() - timeout < 10000L) {
+    Serial.println("[D] connected");
     int i = 0;
+    char c;
     while (client.available()) {
-      if (!file.print(char(client.read()))) {
-        Serial.println("Append Fault");
+    Serial.println("[D] available");
+      char c;
+      c = (char)client.read();
+      Serial.println(c); 
+      if (!file.print(c)) {
+        Serial.println("[-] Append Fault");
       }
-      //Serial.print((char)c);       // Uncomment this to show data
+      Serial.println(c);       // Uncomment this to show data
       //crc.update(c);
       readLength++;
 
@@ -133,10 +151,10 @@ void GSMFirmwareUpdater::updateFirmware(TinyGsmClientSecure &client, CellularNet
   timeElapsed = millis() - timeElapsed;
 
   client.stop();
-  Serial.println(F("Server disconnected"));
+  Serial.println("[-] Server disconnected");
 
   network.connection.gprsDisconnect();
-  Serial.println(F("GPRS disconnected"));
+  Serial.println("[-] GPRS disconnected");
 
   float duration = float(timeElapsed) / 1000;
 
@@ -176,10 +194,12 @@ void GSMFirmwareUpdater::updateFirmware(TinyGsmClientSecure &client, CellularNet
  */
 bool GSMFirmwareUpdater::spiffsInit() // privte
 {
-  if (!SPIFFS.begin(true)) {
+  if (!SPIFFS.begin(false)) {
     Serial.println("[i] SPIFFS Mount Failed");
     return false;
   }
+  
+  Serial.println("[i] SPIFFS Mounted");
   SPIFFS.format();
   this->listDir(SPIFFS, "/", 0);
   return true;
@@ -264,7 +284,7 @@ void writeFile(fs::FS &fs, const char *path, const char *message)
 
 void GSMFirmwareUpdater::listDir(fs::FS &fs, const char *dirname, uint8_t levels)
 {
-  Serial.printf("Listing directory: %s\n", dirname);
+  Serial.printf("[i] Listing directory: %s\n", dirname);
 
   File root = fs.open(dirname);
   
@@ -287,9 +307,9 @@ void GSMFirmwareUpdater::listDir(fs::FS &fs, const char *dirname, uint8_t levels
         listDir(fs, file.name(), levels - 1);
       }
     } else {
-      Serial.print("  FILE: ");
+      Serial.print("  [i] File: ");
       Serial.print(file.name());
-      Serial.print("  SIZE: ");
+      Serial.print("  Size: ");
       Serial.println(file.size());
     }
     file = root.openNextFile();

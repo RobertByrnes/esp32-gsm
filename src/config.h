@@ -61,7 +61,7 @@ const string OAUTH_TOKEN_PATH = "/oauth/token";
 // location of firmware file on external web server
 // change to your actual .bin location
 const char *UPDATE_HOST = "draperbiotech.clystnet.com";
-const char *UPDATE_URL = "https://draperbiotech.clystnet.com/firmware.bin"; // must include either http:// or https://
+const char *UPDATE_URL = "draperbiotech.clystnet.com/firmware.bin"; // must include either http:// or https:// for WiFi
 const char *UPDATE_VERSION_FILE_URL = "https://draperbiotech.clystnet.com/firmware.txt";
 
 // WiFi credentials
