@@ -77,7 +77,7 @@ const char * OAuth2::personalAccessClientTokenRequestString() // public
 {
   //** FORMAT **//
   // POST /oauth/token HTTP/1.1
-  // Host: draperbiotech.clystnet.com
+  // Host: example.server.com
   // Accept: application/json
   // Content-Type: application/x-www-form-urlencoded
   // Content-Length: 96
