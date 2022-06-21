@@ -3,5 +3,8 @@
 build/
 src/config.h
 esp32_config.h
+include/config.h
+include/credentials.h
+include/modem.h
 *.txt
 *.log
